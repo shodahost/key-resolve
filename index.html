@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DaVinci Resolve Shortcuts — Cheat Sheet</title>
+<meta name="description" content="The most useful DaVinci Resolve keyboard shortcuts in a clean, modern layout. Editing, trimming, color, navigation and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0b0f;
+    --bg-soft: #12141c;
+    --card: #161925;
+    --card-2: #1c2030;
+    --border: #262a3b;
+    --border-soft: #20232f;
+    --text: #eef0f6;
+    --muted: #9aa3b8;
+    --faint: #6a7186;
+    --accent: #ff5a3c;
+    --accent-2: #ffb02e;
+    --accent-3: #4f8cff;
+    --key-bg: #20243a;
+    --key-top: #2a2f4a;
+    --key-text: #eaf0ff;
+    --shadow: 0 10px 30px rgba(0,0,0,.45);
+    --radius: 18px;
+  }
+  [data-theme="light"]{
+    --bg:#f4f5fa; --bg-soft:#ffffff; --card:#ffffff; --card-2:#f5f6fb;
+    --border:#e4e7f0; --border-soft:#eceef5; --text:#161925; --muted:#5a6479;
+    --faint:#8a93a8; --key-bg:#eef1fb; --key-top:#ffffff; --key-text:#1d2333;
+    --shadow:0 12px 30px rgba(40,50,90,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(900px 500px at 12% -8%, rgba(255,90,60,.12), transparent 60%),
+      radial-gradient(800px 500px at 95% 0%, rgba(79,140,255,.12), transparent 55%);
+    background-attachment:fixed;
+    transition:background-color .3s,color .3s;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+
+  /* Polish translation styling */
+  .pl{display:block;color:var(--faint);font-weight:400;font-style:italic;}
+
+  /* HEADER */
+  header{padding:64px 0 26px;text-align:center;position:relative}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    padding:6px 14px;border-radius:100px;margin-bottom:22px;
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  h1{
+    font-size:clamp(2.1rem,6vw,3.7rem);font-weight:900;line-height:1.05;letter-spacing:-.02em;
+    background:linear-gradient(135deg,var(--text) 30%, var(--accent) 130%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);font-size:clamp(1rem,2.2vw,1.18rem);margin:18px auto 0;max-width:640px}
+  .subtitle .pl{font-size:.92em;margin-top:6px}
+
+  /* SEARCH + CONTROLS */
+  .controls{
+    position:sticky;top:0;z-index:50;padding:16px 0;margin-top:34px;
+    background:color-mix(in srgb, var(--bg) 80%, transparent);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;transition:border-color .25s;
+  }
+  .controls.stuck{border-color:var(--border)}
+  .controls-inner{display:flex;gap:12px;align-items:center}
+  .search{position:relative;flex:1}
+  .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--faint)}
+  .search input{
+    width:100%;padding:14px 16px 14px 46px;font-size:1rem;font-family:inherit;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);
+    outline:none;transition:border-color .2s,box-shadow .2s;
+  }
+  .search input:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+  .search input::placeholder{color:var(--faint)}
+  .icon-btn{
+    flex:none;width:50px;height:50px;display:grid;place-items:center;cursor:pointer;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);
+    transition:transform .15s,border-color .2s,background .2s;
+  }
+  .icon-btn:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .icon-btn svg{width:20px;height:20px}
+
+  /* CHIPS */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:22px 0 8px}
+  .chip{
+    font-size:.86rem;font-weight:600;cursor:pointer;user-select:none;
+    padding:8px 15px;border-radius:100px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);transition:all .18s;
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .chip:hover{color:var(--text);border-color:var(--faint);transform:translateY(-1px)}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip .emoji{font-size:1rem}
+
+  /* JKL HERO */
+  .jkl{
+    margin:42px 0;padding:30px;border-radius:var(--radius);
+    background:linear-gradient(135deg,var(--card),var(--card-2));
+    border:1px solid var(--border);box-shadow:var(--shadow);
+  }
+  .jkl h2{font-size:1.35rem;font-weight:800;display:flex;align-items:center;gap:10px}
+  .jkl h2 .pl{display:inline;font-size:.7em}
+  .jkl p{color:var(--muted);margin:10px 0 6px;max-width:680px}
+  .jkl p.pl{margin:0 0 24px;max-width:680px}
+  .jkl-keys{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .bigkey{
+    flex:1;min-width:150px;max-width:240px;text-align:center;padding:22px 16px;border-radius:16px;
+    background:var(--bg-soft);border:1px solid var(--border);transition:transform .2s,border-color .2s;
+  }
+  .bigkey:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .bigkey .cap{
+    display:inline-grid;place-items:center;width:62px;height:62px;margin-bottom:14px;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.8rem;color:var(--key-text);
+    background:linear-gradient(180deg,var(--key-top),var(--key-bg));
+    border-radius:14px;border:1px solid var(--border);
+    box-shadow:0 4px 0 var(--border),0 6px 12px rgba(0,0,0,.25);
+  }
+  .bigkey strong{display:block;font-size:1.02rem;margin-bottom:4px}
+  .bigkey span.en{color:var(--muted);font-size:.88rem;display:block}
+  .bigkey span.pl{font-size:.82rem;margin-top:2px}
+
+  /* CATEGORY SECTIONS */
+  .cat{margin:36px 0;scroll-margin-top:90px}
+  .cat-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .cat-head .emoji{
+    font-size:1.4rem;width:48px;height:48px;display:grid;place-items:center;border-radius:13px;
+    background:var(--card);border:1px solid var(--border);flex:none;
+  }
+  .cat-head h2{font-size:1.4rem;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+  .cat-head h2 .pl{font-size:.62em;font-weight:500}
+  .cat-head .count{margin-left:auto;font-size:.82rem;color:var(--faint);font-weight:600;text-align:right}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+  .row{
+    display:flex;align-items:center;gap:16px;padding:15px 18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--border-soft);transition:border-color .18s,transform .12s,background .18s;
+  }
+  .row:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .keys{flex:none;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  kbd{
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--key-text);
+    background:linear-gradient(180deg,var(--key-top),var(--key-bg));
+    padding:5px 9px;border-radius:7px;border:1px solid var(--border);
+    box-shadow:0 2px 0 var(--border);white-space:nowrap;line-height:1;
+  }
+  .keys .plus{color:var(--faint);font-size:.78rem;font-weight:700}
+  .keys .slash{color:var(--faint);font-size:.85rem;font-weight:700;margin:0 1px}
+  .action{color:var(--text);font-size:.94rem}
+  .action .pl{font-size:.82rem;margin-top:2px}
+  .action .hint{display:block;color:var(--faint);font-size:.8rem;margin-top:3px;font-style:normal}
+  .action .hint .pl{display:inline;font-size:1em;font-style:italic}
+
+  .no-results{text-align:center;padding:60px 20px;color:var(--muted);display:none}
+  .no-results.show{display:block}
+  .no-results .big{font-size:2.4rem;margin-bottom:8px}
+
+  /* TOP5 */
+  .top5{
+    margin:46px 0;padding:32px;border-radius:var(--radius);
+    background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--card)),var(--card));
+    border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border));
+  }
+  .top5 h2{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+  .top5 .lead{color:var(--muted);margin-bottom:22px}
+  .top5 .lead .pl{font-size:.92em}
+  .top5 ol{list-style:none;counter-reset:t;display:grid;gap:11px}
+  .top5 li{
+    counter-increment:t;display:flex;align-items:center;gap:16px;
+    padding:14px 18px;background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:13px;
+  }
+  .top5 li::before{
+    content:counter(t);flex:none;width:34px;height:34px;display:grid;place-items:center;
+    font-weight:800;font-size:1rem;color:#fff;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  }
+  .top5 li .t-keys{flex:none}
+  .top5 li .t-desc{color:var(--muted);font-size:.92rem}
+  .top5 li .t-desc b{color:var(--text)}
+  .top5 li .t-desc .pl{font-size:.88em}
+
+  footer{text-align:center;padding:48px 0 60px;color:var(--faint);font-size:.88rem;border-top:1px solid var(--border-soft);margin-top:40px}
+  footer a{color:var(--accent);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+
+  .note{
+    font-size:.78rem;color:var(--faint);background:var(--card);border:1px solid var(--border-soft);
+    border-radius:10px;padding:10px 14px;display:inline-block;margin-top:14px;
+  }
+  .note .pl{display:block;margin-top:4px}
+
+  @media (max-width:640px){
+    header{padding:44px 0 18px}
+    .grid{grid-template-columns:1fr}
+    .jkl,.top5{padding:22px}
+    .controls-inner{flex-wrap:nowrap}
+  }
+  ::selection{background:var(--accent);color:#fff}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="badge"><span class="dot"></span>DaVinci Resolve · Cheat Sheet</div>
+  <h1>DaVinci Resolve<br>Keyboard Shortcuts</h1>
+  <p class="subtitle">The most useful shortcuts grouped by category. Search, filter and learn faster — without reaching for the mouse.
+    <span class="pl">Najprzydatniejsze skróty pogrupowane tematycznie. Wyszukuj, filtruj i ucz się szybciej — bez sięgania po mysz.</span>
+  </p>
+</header>
+
+<div class="controls" id="controls">
+  <div class="wrap controls-inner">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="search" placeholder="Search a shortcut or action…  /  Szukaj skrótu lub akcji…" autocomplete="off">
+    </div>
+    <button class="icon-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">
+      <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <div class="chips" id="chips"></div>
+
+  <!-- JKL HERO -->
+  <section class="jkl" data-cat="Playback">
+    <h2>▶ The foundation of fast review: J / K / L</h2>
+    <p>The three keys every fast review workflow is built on. Hold <kbd>K</kbd>+<kbd>L</kbd> together for slow-motion frame stepping. <kbd>Space</kbd> toggles normal play/pause.</p>
+    <p class="pl">Trzy klawisze, na których opiera się każdy szybki przegląd materiału. Przytrzymaj <kbd>K</kbd>+<kbd>L</kbd> razem, aby uzyskać zwolnione tempo. <kbd>Spacja</kbd> to zwykłe odtwórz/pauza.</p>
+    <div class="jkl-keys">
+      <div class="bigkey"><div class="cap">J</div><strong>Play backward</strong><span class="en">more presses = faster</span><span class="en pl">więcej naciśnięć = szybciej</span></div>
+      <div class="bigkey"><div class="cap">K</div><strong>Stop / Pause</strong><span class="en">halt playback</span><span class="en pl">zatrzymanie odtwarzania</span></div>
+      <div class="bigkey"><div class="cap">L</div><strong>Play forward</strong><span class="en">2× · 4× · 8×</span><span class="en pl">do przodu, coraz szybciej</span></div>
+    </div>
+  </section>
+
+  <div id="sections"></div>
+
+  <div class="no-results" id="noResults">
+    <div class="big">🔍</div>
+    <strong>No results</strong>
+    <p>No shortcut matches your query.<span class="pl">Nie znaleziono skrótu pasującego do zapytania.</span></p>
+  </div>
+
+  <!-- TOP 5 -->
+  <section class="top5">
+    <h2>🏆 Top 5 to learn first</h2>
+    <p class="lead">If you only learn five things — make it these.<span class="pl">Jeśli masz nauczyć się tylko pięciu rzeczy — niech to będą te.</span></p>
+    <ol>
+      <li><span class="t-keys keys"><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd></span><span class="t-desc"><b>Transport control</b> — scrubbing &amp; playback<span class="pl">Sterowanie transportem — przewijanie i odtwarzanie</span></span></li>
+      <li><span class="t-keys keys"><kbd>I</kbd><span class="slash">/</span><kbd>O</kbd></span><span class="t-desc"><b>In / Out points</b> — marking a range<span class="pl">Punkty In / Out — zaznaczanie zakresu</span></span></li>
+      <li><span class="t-keys keys"><kbd>,</kbd><span class="slash">/</span><kbd>.</kbd></span><span class="t-desc"><b>Frame nudging</b> in trim mode<span class="pl">Przesuwanie o klatkę w trybie trymowania</span></span></li>
+      <li><span class="t-keys keys"><kbd>M</kbd></span><span class="t-desc"><b>Markers</b> — flag spots on the timeline<span class="pl">Markery — oznaczanie miejsc na osi czasu</span></span></li>
+      <li><span class="t-keys keys"><kbd>Cmd/Ctrl</kbd><span class="plus">+</span><kbd>1–7</kbd></span><span class="t-desc"><b>Page switching</b> without the taskbar<span class="pl">Przełączanie stron bez dotykania paska</span></span></li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>DaVinci Resolve shortcut cheat sheet · <span id="total"></span> shortcuts</p>
+  <p class="note">💡 On Mac use <kbd>Cmd</kbd>, on Windows/Linux use <kbd>Ctrl</kbd>. Shortcuts may vary by page and software version.
+    <span class="pl">Na Macu używaj <kbd>Cmd</kbd>, na Windows/Linux <kbd>Ctrl</kbd>. Skróty mogą się różnić w zależności od strony i wersji programu.</span>
+  </p>
+</footer>
+
+<script>
+const DATA = [
+  { cat:"Playback", catPl:"Odtwarzanie", emoji:"▶", items:[
+    { keys:["Space"], action:"Play / Pause", actionPl:"Odtwórz / Pauza" },
+    { keys:["J"], action:"Play backward", actionPl:"Odtwarzaj do tyłu", hint:"more presses speed it up", hintPl:"kolejne naciśnięcia przyspieszają" },
+    { keys:["K"], action:"Stop / Pause", actionPl:"Stop / Pauza" },
+    { keys:["L"], action:"Play forward", actionPl:"Odtwarzaj do przodu", hint:"2× · 4× · 8×", hintPl:"2× · 4× · 8×" },
+    { keys:["K","L"], combo:true, action:"Frame stepping / slow-motion", actionPl:"Krok poklatkowy / slow-motion", hint:"hold both", hintPl:"przytrzymaj oba" },
+  ]},
+  { cat:"Editing", catPl:"Montaż", emoji:"✂", items:[
+    { keys:["Cmd/Ctrl","B"], combo:true, action:"Blade / cut clip at playhead", actionPl:"Tnij klip w miejscu głowicy" },
+    { keys:["Del"], action:"Ripple delete", actionPl:"Ripple delete", hint:"removes clip and closes the gap", hintPl:"usuwa klip i zamyka lukę" },
+    { keys:["Backspace"], action:"Delete, leaving a gap", actionPl:"Usuń, pozostaw lukę" },
+    { keys:["A"], action:"Selection tool", actionPl:"Narzędzie zaznaczania" },
+    { keys:["B"], action:"Blade tool", actionPl:"Narzędzie żyletki" },
+    { keys:["Cmd/Ctrl","Z"], combo:true, action:"Undo", actionPl:"Cofnij" },
+    { keys:["Cmd/Ctrl","Shift","Z"], combo:true, action:"Redo", actionPl:"Ponów" },
+  ]},
+  { cat:"Trimming", catPl:"Trymowanie", emoji:"🎯", items:[
+    { keys:["T"], action:"Activate trim mode", actionPl:"Tryb trymowania" },
+    { keys:[","], action:"Nudge 1 frame left", actionPl:"Przesuń o 1 klatkę w lewo" },
+    { keys:["."], action:"Nudge 1 frame right", actionPl:"Przesuń o 1 klatkę w prawo" },
+    { keys:["Shift",","], combo:true, action:"Nudge 5 frames left", actionPl:"Przesuń o 5 klatek w lewo" },
+    { keys:["Shift","."], combo:true, action:"Nudge 5 frames right", actionPl:"Przesuń o 5 klatek w prawo" },
+    { keys:["Cmd/Ctrl","Shift","["], combo:true, action:"Trim clip start to playhead", actionPl:"Przytnij początek klipu do głowicy" },
+    { keys:["Cmd/Ctrl","Shift","]"], combo:true, action:"Trim clip end to playhead", actionPl:"Przytnij koniec klipu do głowicy" },
+  ]},
+  { cat:"In / Out & Markers", catPl:"In / Out i Markery", emoji:"📌", items:[
+    { keys:["I"], action:"Set In point", actionPl:"Ustaw punkt In" },
+    { keys:["O"], action:"Set Out point", actionPl:"Ustaw punkt Out" },
+    { keys:["X"], action:"Set In/Out around selected clip", actionPl:"Ustaw In/Out wokół zaznaczonego klipu" },
+    { keys:["Alt","X"], combo:true, action:"Clear In/Out points", actionPl:"Wyczyść punkty In/Out" },
+    { keys:["M"], action:"Drop a marker at playhead", actionPl:"Dodaj marker w miejscu głowicy" },
+    { keys:["Shift","M"], combo:true, action:"Edit marker", actionPl:"Edytuj marker", hint:"color, name, notes", hintPl:"kolor, nazwa, notatki" },
+    { keys:["↑"], action:"Jump to previous marker", actionPl:"Skocz do poprzedniego markera" },
+    { keys:["↓"], action:"Jump to next marker", actionPl:"Skocz do następnego markera" },
+  ]},
+  { cat:"Color Page", catPl:"Strona Color", emoji:"🎨", items:[
+    { keys:["Alt","S"], combo:true, action:"Add serial node", actionPl:"Dodaj węzeł szeregowy", hint:"most used", hintPl:"najczęściej używany" },
+    { keys:["Alt","P"], combo:true, action:"Add parallel node", actionPl:"Dodaj węzeł równoległy" },
+    { keys:["Alt","L"], combo:true, action:"Add layer node", actionPl:"Dodaj węzeł warstwowy" },
+    { keys:["Cmd/Ctrl","D"], combo:true, action:"Enable / disable current node", actionPl:"Włącz / wyłącz bieżący węzeł" },
+    { keys:["Cmd/Ctrl","Shift","C"], combo:true, action:"Copy grade", actionPl:"Kopiuj grade" },
+    { keys:["Cmd/Ctrl","Shift","V"], combo:true, action:"Paste grade", actionPl:"Wklej grade" },
+    { keys:["Shift","H"], combo:true, action:"Highlight power window area", actionPl:"Podświetl obszar power window" },
+  ]},
+  { cat:"Navigation", catPl:"Nawigacja", emoji:"🧭", items:[
+    { keys:["←"], action:"Step 1 frame back", actionPl:"Krok o 1 klatkę wstecz" },
+    { keys:["→"], action:"Step 1 frame forward", actionPl:"Krok o 1 klatkę naprzód" },
+    { keys:["Shift","←"], combo:true, action:"Jump 1 second back", actionPl:"Skok o 1 sekundę wstecz" },
+    { keys:["Shift","→"], combo:true, action:"Jump 1 second forward", actionPl:"Skok o 1 sekundę naprzód" },
+    { keys:["Home"], action:"Go to timeline start", actionPl:"Początek osi czasu" },
+    { keys:["End"], action:"Go to timeline end", actionPl:"Koniec osi czasu" },
+    { keys:["Shift","Z"], combo:true, action:"Fit entire timeline in window", actionPl:"Dopasuj całą oś czasu do okna" },
+    { keys:["Cmd/Ctrl","Shift","+"], combo:true, action:"Zoom timeline in", actionPl:"Przybliż oś czasu" },
+    { keys:["Cmd/Ctrl","Shift","-"], combo:true, action:"Zoom timeline out", actionPl:"Oddal oś czasu" },
+    { keys:["Cmd/Ctrl","1–7"], combo:true, action:"Switch between pages", actionPl:"Przełączaj strony", hint:"Media → Deliver", hintPl:"Media → Deliver" },
+  ]},
+];
+
+// ---- render ----
+const sectionsEl = document.getElementById('sections');
+const chipsEl = document.getElementById('chips');
+let total = 0;
+
+function renderKeys(it){
+  const sep = it.combo ? '<span class="plus">+</span>' : '';
+  return it.keys.map(k=>`<kbd>${k}</kbd>`).join(sep);
+}
+
+DATA.forEach((c,i)=>{
+  total += c.items.length;
+  const sec = document.createElement('section');
+  sec.className='cat'; sec.dataset.cat=c.cat; sec.id='cat-'+i;
+  sec.innerHTML = `
+    <div class="cat-head">
+      <div class="emoji">${c.emoji}</div>
+      <h2>${c.cat}<span class="pl">${c.catPl}</span></h2>
+      <span class="count">${c.items.length} shortcuts<br><span class="pl">skrótów</span></span>
+    </div>
+    <div class="grid">
+      ${c.items.map(it=>`
+        <div class="row" data-text="${(it.action+' '+it.actionPl+' '+it.keys.join(' ')+' '+(it.hint||'')+' '+(it.hintPl||'')).toLowerCase()}">
+          <div class="keys">${renderKeys(it)}</div>
+          <div class="action">${it.action}<span class="pl">${it.actionPl}</span>${it.hint?`<span class="hint">${it.hint}<span class="pl"> · ${it.hintPl}</span></span>`:''}</div>
+        </div>`).join('')}
+    </div>`;
+  sectionsEl.appendChild(sec);
+});
+
+// count J/K/L hero too
+total += 5;
+document.getElementById('total').textContent = total;
+
+// chips
+const cats = [{en:'All',pl:'Wszystkie'}, ...DATA.map(c=>({en:c.cat,pl:c.catPl}))];
+const emojis = ['✦', ...DATA.map(c=>c.emoji)];
+cats.forEach((name,i)=>{
+  const chip=document.createElement('button');
+  chip.className='chip'+(i===0?' active':'');
+  chip.innerHTML=`<span class="emoji">${emojis[i]}</span>${name.en}`;
+  chip.title=name.pl;
+  chip.onclick=()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    filterCat(name.en);
+  };
+  chipsEl.appendChild(chip);
+});
+
+function filterCat(name){
+  document.getElementById('search').value='';
+  document.querySelectorAll('.row').forEach(r=>r.style.display='');
+  const jkl=document.querySelector('.jkl');
+  document.querySelectorAll('.cat').forEach(sec=>{
+    const show = name==='All' || sec.dataset.cat===name;
+    sec.style.display = show?'':'none';
+  });
+  jkl.style.display = (name==='All'||name==='Playback')?'':'none';
+  document.getElementById('noResults').classList.remove('show');
+}
+
+// search
+const searchEl=document.getElementById('search');
+searchEl.addEventListener('input',()=>{
+  const q=searchEl.value.trim().toLowerCase();
+  if(q){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));}
+  document.querySelector('.jkl').style.display = q?'none':'';
+  let any=false;
+  document.querySelectorAll('.cat').forEach(sec=>{
+    let visible=0;
+    sec.querySelectorAll('.row').forEach(r=>{
+      const match = !q || r.dataset.text.includes(q);
+      r.style.display=match?'':'none';
+      if(match)visible++;
+    });
+    sec.style.display = visible>0?'':'none';
+    if(visible>0)any=true;
+  });
+  if(!q){filterCat('All');document.querySelector('.chip').classList.add('active');}
+  document.getElementById('noResults').classList.toggle('show',!any && !!q);
+});
+
+// theme
+const themeBtn=document.getElementById('theme');
+const root=document.documentElement;
+const moon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const sun='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2M12 20.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1.5 12h2M20.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>';
+function setTheme(t){root.setAttribute('data-theme',t);themeBtn.innerHTML=t==='light'?sun:moon;localStorage.setItem('theme',t);}
+setTheme(localStorage.getItem('theme')|| (matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'));
+themeBtn.onclick=()=>setTheme(root.getAttribute('data-theme')==='light'?'dark':'light');
+
+// sticky border
+const controls=document.getElementById('controls');
+addEventListener('scroll',()=>controls.classList.toggle('stuck',scrollY>controls.offsetTop+10));
+
+// keyboard: "/" focuses search
+addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==searchEl){e.preventDefault();searchEl.focus();}
+  if(e.key==='Escape'){searchEl.value='';searchEl.dispatchEvent(new Event('input'));searchEl.blur();}
+});
+</script>
+</body>
+</html>
