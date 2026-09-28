@@ -1,0 +1,15 @@
+{
+  "name": "DaVinci Resolve Shortcuts — Cheat Sheet",
+  "short_name": "Resolve Keys",
+  "description": "Interactive DaVinci Resolve shortcut cheat sheet for learners.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0b0f",
+  "theme_color": "#0a0b0f",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "favicon-32.png", "sizes": "32x32", "type": "image/png" }
+  ]
+}
