@@ -1,37 +1,40 @@
 #!/usr/bin/env python3
 """
-Verify assets/data.js against DaVinci Resolve's own default keyboard preset.
+Verify assets/data.js against the reference files in reference/.
 
-Resolve is closed source, so the source of truth is an export of the default
-"DaVinci Resolve" keyboard preset, stored in reference/:
+Resolve is closed source, so data.js is only as good as its reference. The
+reference for this version of the cheat sheet is the DaVinci Resolve Club
+article "DaVinci Resolve keyboard shortcuts" (Resolve 21.1, updated
+2026-09-27), stored as two tab-separated files (see meta.reference):
 
-    DaVinci Resolve -> Keyboard Customization (Ctrl+Alt+K / Cmd+Opt+K)
-      -> preset menu (…) -> Export Preset…  ->  reference/<name>.txt
-
-The file names are listed in meta.keymaps in data.js ("win" and optionally
-"mac"). tools/resolve_keymap.py documents the export format.
+  reference/resolve-21.1-article-table.tsv  the article's table, extracted by
+                                            tools/extract_article.py
+  reference/resolve-21.1-article-text.tsv   shortcuts the article gives in its
+                                            text, with the exact quote
 
 Every shortcut in data.js is one of:
 
-  * "cmd"  - the Resolve command id(s) from the export. The script checks that
-             the keys in "k" (and "mk" for macOS, if a macOS export exists)
-             really are bound to that command.
-  * "hc"   - built-in behaviour that is not in the keyboard preset (mouse
-             modifiers, typing a timecode...). Needs "src", the Reference
-             Manual chapter it comes from. Only the key tokens are checked.
-  * "mq"   - (optional, together with "src") a short quote from the Reference
-             Manual that shows the keys. Checked when --manual is given.
+  * "cmd" - the action name(s) exactly as in a reference file (one per key
+            alternative, or one for all). The script checks that the keys in
+            "k" match the Windows column and that the macOS keys ("mk", or
+            "k" shown with Cmd/Option) match the macOS column.
+  * "hc"  - built-in behaviour described in the article's text but not given
+            as a key assignment (holding K, typing into a field...). Needs
+            "src", the article section it comes from. Only key tokens are checked.
 
-Anything that is neither verified by the export nor marked "hc" is reported
-as "to check" and makes the script fail.
+Optionally an item can carry "id", the internal Resolve command id from an
+export of the default keyboard preset (Keyboard Customization -> ... ->
+Export Preset). When meta.keymaps points to such exports in reference/,
+those ids are checked too (format: tools/resolve_keymap.py).
+
+Anything that is neither verified nor "hc" is reported as "to check"
+("do sprawdzenia") and makes the script fail.
 
 Usage:
-  python3 tools/verify_shortcuts.py                  # verify, exit != 0 on problems
-  python3 tools/verify_shortcuts.py --write          # also rewrite data.js in the stable format
-  python3 tools/verify_shortcuts.py --fill-cmd       # fill missing "cmd" from the export (unique matches)
-  python3 tools/verify_shortcuts.py --manual man.txt # check "mq" quotes (text from pdftotext)
-  python3 tools/verify_shortcuts.py --find "Ctrl+B"  # which commands use a key
-  python3 tools/verify_shortcuts.py --dump km.txt    # write the parsed export
+  python3 tools/verify_shortcuts.py                        # verify, exit != 0 on problems
+  python3 tools/verify_shortcuts.py --write                # also rewrite data.js in the stable format
+  python3 tools/verify_shortcuts.py --article saved.html   # also re-check the reference files against the article
+  python3 tools/verify_shortcuts.py --find "Ctrl+Backslash" # what uses a key
 
 Only the Python standard library is used. It is meant to run locally
 (there is deliberately no CI).
@@ -39,11 +42,10 @@ Only the Python standard library is used. It is meant to run locally
 
 import argparse
 import datetime
+import html
 import json
 import os
 import re
-import shutil
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -52,7 +54,7 @@ import resolve_keymap as rk  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_JS = os.path.join(ROOT, "assets", "data.js")
 DATA_PREFIX = "window.KB_DATA = "
-ITEM_KEYS = ("k", "mk", "en", "pl", "l", "h", "st", "cmd", "hc", "src", "mq")
+ITEM_KEYS = ("k", "mk", "en", "pl", "l", "h", "st", "cmd", "id", "hc", "src")
 
 
 # ---------------------------------------------------------------- data.js I/O
@@ -126,9 +128,28 @@ def chords(alt):
     return alt.split(" ")
 
 
-def mac_default(chord):
-    """The macOS chord when no "mk" is given: exports use the same text on both platforms."""
-    return chord
+def read_tsv(path):
+    with open(os.path.join(ROOT, path), encoding="utf-8") as f:
+        lines = [ln.rstrip("\n") for ln in f if ln.strip()]
+    head = lines[0].split("\t")
+    return [dict(zip(head, ln.split("\t"))) for ln in lines[1:]]
+
+
+def load_reference(meta, errors):
+    """action name -> {'win': canonical|None, 'mac': canonical|None, 'file': path, 'row': dict}"""
+    ref = {}
+    for kind, path in meta.get("reference", {}).items():
+        if not os.path.exists(os.path.join(ROOT, path)):
+            errors.append(f"reference file {path} not found")
+            continue
+        for row in read_tsv(path):
+            name = row["action"]
+            if name in ref:
+                errors.append(f"{path}: action {name!r} listed twice")
+            win = rk.normalize_article_keys(row["windows"])
+            mac = win if row["macos"] == "=" else rk.normalize_article_keys(row["macos"])
+            ref[name] = {"win": win, "mac": mac, "file": path, "kind": kind, "row": row}
+    return ref
 
 
 def load_export(path):
@@ -143,25 +164,17 @@ def load_export(path):
     return km
 
 
-def manual_text(path):
-    """Text of the Reference Manual (a .txt from pdftotext, or a .pdf if pdftotext is installed)."""
-    if path.lower().endswith(".pdf"):
-        exe = shutil.which("pdftotext")
-        if not exe:
-            sys.exit("--manual: pdftotext is not installed; convert the PDF to text first")
-        out = subprocess.run([exe, "-layout", path, "-"], capture_output=True, check=True)
-        text = out.stdout.decode("utf-8", "replace")
-    else:
-        with open(path, encoding="utf-8", errors="replace") as f:
-            text = f.read()
-    return norm_text(text)
+def article_text(path):
+    with open(path, encoding="utf-8") as f:
+        src = f.read()
+    src = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", src, flags=re.S)
+    src = re.sub(r"<[^>]+>", " ", src)
+    return norm_text(html.unescape(src))
 
 
 def norm_text(s):
-    s = s.replace("‑", "-").replace("‐", "-").replace("­", "")
     s = s.replace("‘", "'").replace("’", "'").replace("“", '"').replace("”", '"')
-    s = re.sub(r"-\s*\n\s*", "-", s)  # line-broken "Command-\nB"
-    return re.sub(r"\s+", " ", s).lower()
+    return re.sub(r"\s+", " ", s).strip().lower()
 
 
 def check_tokens(it):
@@ -172,27 +185,53 @@ def check_tokens(it):
                     rk.normalize_data_chord(ch)
 
 
-def check_cmd(it, km, field, platform):
-    """Return a list of problems for one platform."""
+def per_alt(value, n):
+    if isinstance(value, list):
+        return value if len(value) == n else None
+    return [value] * n
+
+
+def check_ref(it, ref):
+    """Problems of an item with "cmd" against the article reference."""
     problems = []
-    cmds = it["cmd"] if isinstance(it["cmd"], list) else None
-    keys = alts(it[field])
-    if cmds and len(cmds) != len(keys):
-        return [f"{len(keys)} key alternatives but {len(cmds)} commands"]
-    for i, alt in enumerate(keys):
-        cmd = cmds[i] if cmds else it["cmd"]
-        seq = chords(alt)
-        if len(seq) != 1:
-            problems.append(f"'{alt}': key sequences cannot be checked against the export")
+    win_alts = alts(it["k"])
+    mac_alts = alts(it["mk"]) if it.get("mk") else win_alts
+    names = per_alt(it["cmd"], len(win_alts))
+    if names is None or len(mac_alts) != len(win_alts):
+        return [f"{len(win_alts)} key alternatives, but cmd/mk do not have the same count"]
+    for name, walt, malt in zip(names, win_alts, mac_alts):
+        row = ref.get(name)
+        if not row:
+            problems.append(f"action {name!r} is not in the reference files")
             continue
-        want = rk.normalize_data_chord(seq[0])
-        if field == "k" and platform == "mac":
-            want = mac_default(want)
+        if row["win"] is None:
+            problems.append(f"the reference gives no key for {name!r} ({row['row']['windows']!r})")
+            continue
+        if len(chords(walt)) != 1 or len(chords(malt)) != 1:
+            problems.append(f"'{walt}': key sequences are not in the reference")
+            continue
+        win = rk.normalize_data_chord(walt)
+        mac = rk.normalize_data_chord(malt)
+        if win != row["win"]:
+            problems.append(f"Windows: '{walt}' but {row['file']} says {name!r} = {row['row']['windows']!r}")
+        if mac != row["mac"]:
+            problems.append(f"macOS: '{malt}' but {row['file']} says {name!r} = {row['row']['macos']!r}")
+    return problems
+
+
+def check_id(it, km, platform):
+    problems = []
+    keys = alts(it["mk"] if platform == "mac" and it.get("mk") else it["k"])
+    ids = per_alt(it["id"], len(keys))
+    if ids is None:
+        return [f"{len(keys)} key alternatives but {len(it['id'])} command ids"]
+    for cmd, alt in zip(ids, keys):
+        want = rk.normalize_data_chord(chords(alt)[0])
         if cmd not in km["bindings"]:
             why = "has no key" if cmd in km["unbound"] else "is not in the export"
-            problems.append(f"[{platform}] command {cmd} {why}")
+            problems.append(f"[{platform} export] command {cmd} {why}")
         elif want not in km["bindings"][cmd]:
-            problems.append(f"[{platform}] '{alt}' is not bound to {cmd} (bound: {' | '.join(km['bindings'][cmd])})")
+            problems.append(f"[{platform} export] '{alt}' is not bound to {cmd} (bound: {' | '.join(km['bindings'][cmd])})")
     return problems
 
 
@@ -201,50 +240,58 @@ def check_cmd(it, km, field, platform):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--write", action="store_true", help="rewrite data.js in the stable format and update meta")
-    ap.add_argument("--fill-cmd", action="store_true", help="fill missing cmd from the export when the keys match one command")
-    ap.add_argument("--manual", metavar="FILE", help="Reference Manual as text (or PDF with pdftotext installed) to check 'mq' quotes")
-    ap.add_argument("--find", metavar="KEYS", help="list commands bound to KEYS (data.js syntax, e.g. Ctrl+Shift+Period)")
-    ap.add_argument("--dump", metavar="FILE", help="write the parsed export(s) to FILE")
+    ap.add_argument("--article", metavar="HTML", help="saved copy of the article: re-check the reference files against it")
+    ap.add_argument("--find", metavar="KEYS", help="list reference actions and data.js items using KEYS (e.g. Ctrl+Backslash)")
     args = ap.parse_args()
 
     data = read_data()
     meta = data["meta"]
-    paths = meta.get("keymaps", {})
     errors, warnings = [], []
+    ref = load_reference(meta, errors)
+    print(f"reference: {len(ref)} actions from {', '.join(meta.get('reference', {}).values())}")
+
     exports = {}
-    for platform in ("win", "mac"):
-        if paths.get(platform):
-            try:
-                km = load_export(paths[platform])
-            except rk.KeymapError as ex:
-                errors.append(str(ex))
-                km = None
-            if km is None and not any(paths[platform] in e for e in errors):
-                warnings.append(f"{platform} export {paths[platform]} not found")
-            if km:
-                exports[platform] = km
-                print(f"{platform}: {paths[platform]} — {len(km['bindings'])} bound commands, "
-                      f"{len(km['unbound'])} without keys" + (f", based on {km['imports']}" if km["imports"] else ""))
-    win, mac = exports.get("win"), exports.get("mac")
+    for platform, path in meta.get("keymaps", {}).items():
+        try:
+            km = load_export(path)
+        except rk.KeymapError as ex:
+            errors.append(str(ex))
+            continue
+        if km is None:
+            warnings.append(f"{platform} export {path} not found — 'id' fields not checked")
+            continue
+        exports[platform] = km
+        print(f"{platform} export: {path} — {len(km['bindings'])} bound commands")
+
+    if args.article:
+        text = article_text(args.article)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import extract_article
+        fresh = extract_article.extract(args.article)
+        table = meta["reference"].get("table")
+        rows = [[r[h] for h in extract_article.HEADER] for r in read_tsv(table)] if table else []
+        if fresh != rows:
+            errors.append(f"{table} differs from the article table (re-run tools/extract_article.py)")
+        for name, r in ref.items():
+            q = r["row"].get("quote")
+            if q and norm_text(q) not in text:
+                errors.append(f"{r['file']}: quote for {name!r} not found in the article: {q!r}")
+        print("article: table and quotes re-checked")
 
     if args.find:
         want = rk.normalize_data_chord(args.find)
-        for platform, km in exports.items():
-            print(f"{platform}: {want} -> {', '.join(rk.reverse_index(km['bindings']).get(want, [])) or '(nothing)'}")
+        for name, r in ref.items():
+            if want in (r["win"], r["mac"]):
+                print(f"reference: {name} ({r['row']['windows']} / {r['row']['macos']})")
+        for cat in data["categories"]:
+            for g in cat["groups"]:
+                for it in g["items"]:
+                    if any(rk.normalize_data_chord(ch) == want for a in alts(it["k"]) for ch in chords(a)):
+                        print(f"data.js [{cat['id']}]: {it['k']} — {it['en']}")
         return
-    if args.dump:
-        with open(args.dump, "w", encoding="utf-8") as f:
-            for platform, km in exports.items():
-                f.write(f"=== {platform}\n")
-                for cmd in sorted(km["bindings"]):
-                    f.write(f"{cmd} := {' | '.join(km['bindings'][cmd])}\n")
-        print(f"export written to {args.dump}")
 
-    manual = manual_text(args.manual) if args.manual else None
-    rev = rk.reverse_index(win["bindings"]) if win else {}
-
-    n_cmd = n_mac = n_hc = n_mq = filled = 0
-    todo = []
+    n_ok = n_hc = n_id = 0
+    todo, used = [], set()
     seen = set()
     for cat in data["categories"]:
         for g in cat["groups"]:
@@ -261,63 +308,57 @@ def main():
                     continue
                 if it.get("l") not in (1, 2, 3):
                     errors.append(f"{label}: level 'l' must be 1, 2 or 3")
+                for f in ("en", "pl"):
+                    if not it.get(f):
+                        errors.append(f"{label}: missing '{f}'")
                 if it.get("cmd") and it.get("hc"):
                     errors.append(f"{label}: an item is either 'cmd' or 'hc', not both")
-
-                if args.fill_cmd and win and not it.get("cmd") and not it.get("hc"):
-                    found = []
-                    for alt in alts(it["k"]):
-                        seq = chords(alt)
-                        hits = rev.get(rk.normalize_data_chord(seq[0]), []) if len(seq) == 1 else []
-                        found.append(hits[0] if len(hits) == 1 else None)
-                    if all(found):
-                        it["cmd"] = found[0] if len(set(found)) == 1 else found
-                        filled += 1
-
-                if it.get("mq") and manual is not None and norm_text(it["mq"]) not in manual:
-                    errors.append(f"{label}: manual quote not found: {it['mq']!r}")
-                elif it.get("mq") and manual is not None:
-                    n_mq += 1
-                if it.get("mq") and not it.get("src"):
-                    errors.append(f"{label}: 'mq' needs 'src' (manual chapter)")
-
+                if it.get("id"):
+                    for platform, km in exports.items():
+                        probs = check_id(it, km, platform)
+                        errors.extend(f"{label}: {p}" for p in probs)
+                        n_id += 0 if probs else 1
                 if it.get("hc"):
                     if not it.get("src"):
-                        errors.append(f"{label}: built-in item needs 'src' (Reference Manual chapter)")
+                        errors.append(f"{label}: built-in item needs 'src' (source section)")
                     n_hc += 1
                 elif it.get("cmd"):
-                    if not win:
-                        todo.append(f"{label} (cmd {it['cmd']}: no Windows/Linux export to check against)")
-                        continue
-                    probs = check_cmd(it, win, "k", "win")
-                    if mac:
-                        probs += check_cmd(it, mac, "mk" if it.get("mk") else "k", "mac")
-                    if probs:
-                        errors.extend(f"{label}: {p}" for p in probs)
-                    else:
-                        n_cmd += 1
-                        n_mac += 1 if mac else 0
+                    used.update(it["cmd"] if isinstance(it["cmd"], list) else [it["cmd"]])
+                    probs = check_ref(it, ref)
+                    errors.extend(f"{label}: {p}" for p in probs)
+                    n_ok += 0 if probs else 1
                 else:
                     todo.append(label)
 
-    mac_ok = bool(mac) and n_mac == n_cmd and not errors
-    if meta.get("macVerified", False) != mac_ok:
-        if args.write:
-            meta["macVerified"] = mac_ok
-        else:
-            errors.append(f"meta.macVerified is {meta.get('macVerified')} but should be {mac_ok} (run with --write)")
-    if args.write or args.fill_cmd:
-        if not errors and not todo:
+    for s_ in data.get("start", []):
+        for k in s_["keys"]:
+            for ch in k.split(" "):
+                try:
+                    rk.normalize_data_chord(ch)
+                except rk.KeymapError as ex:
+                    errors.append(f"start '{s_['step']['en']}': {ex}")
+
+    mac_ok = not errors and not todo
+    if args.write:
+        meta["macVerified"] = mac_ok
+        if mac_ok:
             meta["verified"] = datetime.date.today().isoformat()
         write_data(data)
-        print("data.js written" + (f" ({filled} commands filled in)" if args.fill_cmd else ""))
+        print("data.js written")
+    elif meta.get("macVerified") != mac_ok:
+        errors.append(f"meta.macVerified is {meta.get('macVerified')} but should be {mac_ok} (run with --write)")
 
-    total = n_cmd + n_hc + len(todo)
-    print(f"\n{total} shortcuts: {n_cmd} verified against the Resolve {meta['resolve']} keyboard preset"
-          f"{f' ({n_mac} also on macOS)' if mac else ' (no macOS export: macOS keys not verified)'}, "
-          f"{n_hc} built-in behaviours (hc, not in the preset), {len(todo)} to check")
-    if manual is not None:
-        print(f"{n_mq} manual quotes found in the Reference Manual")
+    total = n_ok + n_hc + len(todo)
+    unused = [n for n, r in ref.items() if n not in used and r["win"]]
+    nokey = [n for n, r in ref.items() if not r["win"]]
+    print(f"\n{total} shortcuts: {n_ok} verified against the reference (Windows/Linux and macOS keys), "
+          f"{n_hc} built-in behaviours (hc, from the article text), {len(todo)} to check")
+    if exports:
+        print(f"{n_id} command ids checked against the keyboard preset export(s)")
+    if unused:
+        print(f"reference actions with keys not used in data.js: {', '.join(unused)}")
+    if nokey:
+        print(f"reference actions without a key (not listed as shortcuts): {', '.join(nokey)}")
     for w in warnings:
         print(f"  ! {w}")
     if todo:

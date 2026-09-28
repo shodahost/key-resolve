@@ -40,9 +40,9 @@
   var UI = {
     title: ['DaVinci Resolve<br>Keyboard Shortcuts', 'DaVinci Resolve<br>Skróty klawiszowe'],
     badge: ['DaVinci Resolve ' + M.label + ' · Cheat Sheet', 'DaVinci Resolve ' + M.label + ' · Ściąga'],
-    subtitle: ['Shortcuts for DaVinci Resolve ' + M.label + ', grouped by page. Filter by level, pin what you need, quiz yourself — and keep it open on your second screen while you edit.',
-      'Skróty DaVinci Resolve ' + M.label + ' pogrupowane według stron. Filtruj poziom, przypinaj, co potrzebne, ćwicz na fiszkach — i trzymaj ściągę na drugim ekranie podczas montażu.'],
-    searchPh: ['Search an action or keys…  e.g. blade, ripple, ctrl b', 'Szukaj akcji lub klawiszy…  np. tnij, ripple, ctrl b'],
+    subtitle: ['Shortcuts for DaVinci Resolve ' + M.label + ', grouped by task. Filter by level, pin what you need, quiz yourself — and keep it open on your second screen while you edit.',
+      'Skróty DaVinci Resolve ' + M.label + ' pogrupowane według zadań. Filtruj poziom, przypinaj, co potrzebne, ćwicz na fiszkach — i trzymaj ściągę na drugim ekranie podczas montażu.'],
+    searchPh: ['Search an action or keys…  e.g. split, ripple, shift z', 'Szukaj akcji lub klawiszy…  np. przetnij, ripple, shift z'],
     all: ['All', 'Wszystko'],
     pinned: ['My sheet', 'Moja ściąga'],
     levelNames: [['Start', 'Core', 'Pro'], ['Start', 'Podstawy', 'Pro']],
@@ -55,15 +55,15 @@
     themeTip: ['Toggle light / dark', 'Przełącz jasny / ciemny'],
     minimize: ['Minimize header', 'Zwiń nagłówek'],
     expand: ['Expand header', 'Rozwiń nagłówek'],
-    shortcuts: ['shortcuts', 'skrótów'],
-    verified: ['checked in the default keyboard preset', 'sprawdzonych w domyślnym presecie klawiatury'],
+    shortcuts: ['shortcuts', ['skrót', 'skróty', 'skrótów']],
+    verified: ['checked against the reference', 'sprawdzonych ze źródłem'],
     learned: ['Learned', 'Nauczone'],
     markLearned: ['Mark as learned', 'Oznacz jako nauczone'],
     unmarkLearned: ['Learned — click to undo', 'Nauczone — kliknij, by cofnąć'],
     pin: ['Pin to My sheet', 'Przypnij do Mojej ściągi'],
     unpin: ['Pinned — click to unpin', 'Przypięte — kliknij, by odpiąć'],
-    command: ['Keyboard Customization command', 'Polecenie w Keyboard Customization'],
-    builtIn: ['Built-in behaviour (not in the keyboard preset)', 'Wbudowane zachowanie (spoza presetu klawiatury)'],
+    command: ['Command in the reference', 'Polecenie w źródle'],
+    builtIn: ['Built-in behaviour (not a key assignment)', 'Wbudowane zachowanie (nie przypisanie klawisza)'],
     source: ['Source', 'Źródło'],
     studioOnly: ['DaVinci Resolve Studio only', 'Tylko w DaVinci Resolve Studio'],
     tip: ['Pro tip', 'Pro tip'],
@@ -76,8 +76,8 @@
     noResults: ['No results', 'Brak wyników'],
     noResultsText: ['Try other words (English or Polish) or keys like “ctrl b”.', 'Spróbuj innych słów (po polsku lub angielsku) albo klawiszy, np. „ctrl b”.'],
     clearSearch: ['Clear search', 'Wyczyść wyszukiwanie'],
-    results: ['results for', 'wyników dla'],
-    comboResults: ['shortcuts use', 'skrótów używa'],
+    results: ['results for', ['wynik dla', 'wyniki dla', 'wyników dla']],
+    comboResults: ['shortcuts use', ['skrót używa', 'skróty używają', 'skrótów używa']],
     pinnedEmpty: ['Your sheet is empty', 'Twoja ściąga jest pusta'],
     pinnedEmptyText: ['Click the ☆ next to any shortcut to pin it here — build a small sheet for your current project.', 'Kliknij ☆ przy dowolnym skrócie, aby go tu przypiąć — zbuduj małą ściągę do bieżącego projektu.'],
     allLearned: ['Everything here is learned 🎉', 'Wszystko tutaj już umiesz 🎉'],
@@ -116,13 +116,21 @@
     whatDoes: ['What does it do?', 'Co to robi?'],
     footerNote: ['Assumes the default “DaVinci Resolve” keyboard preset (DaVinci Resolve → Keyboard Customization, Ctrl+Alt+K). Many keys act on the panel under focus, and some only work on a specific page.',
       'Zakłada domyślny preset klawiatury „DaVinci Resolve” (DaVinci Resolve → Keyboard Customization, Ctrl+Alt+K). Wiele klawiszy działa w aktywnym panelu, a niektóre tylko na konkretnej stronie.'],
-    footerMacOk: ['macOS keys come from the macOS export of the same preset.', 'Klawisze macOS pochodzą z eksportu tego samego presetu na macOS.'],
-    footerMacNo: ['macOS keys are converted automatically (Ctrl → ⌘ Cmd, Alt → ⌥ Option) and have not been verified against a macOS export.',
-      'Klawisze macOS są przeliczane automatycznie (Ctrl → ⌘ Cmd, Alt → ⌥ Option) i nie zostały zweryfikowane z eksportem z macOS.'],
+    footerMacOk: ['macOS keys are checked against the macOS column of the same reference (Ctrl → ⌘ Cmd, Alt → ⌥ Option).', 'Klawisze macOS są sprawdzone z kolumną macOS tego samego źródła (Ctrl → ⌘ Cmd, Alt → ⌥ Option).'],
+    footerMacNo: ['macOS keys are converted automatically (Ctrl → ⌘ Cmd, Alt → ⌥ Option) and have not been verified.',
+      'Klawisze macOS są przeliczane automatycznie (Ctrl → ⌘ Cmd, Alt → ⌥ Option) i nie zostały zweryfikowane.'],
+    sourceLabel: ['Source', 'Źródło'],
     studioLegend: ['Studio = feature available only in the paid DaVinci Resolve Studio.', 'Studio = funkcja dostępna tylko w płatnej wersji DaVinci Resolve Studio.']
   };
   var uiIdx = function () { return S.lang === 'pl' ? 1 : 0; };
-  function t(key) { return UI[key][uiIdx()]; }
+  function t(key) { var v = UI[key][uiIdx()]; return Array.isArray(v) ? v[2] : v; }
+  // Count + noun with Polish plural forms (1 skrót, 2 skróty, 5 skrótów).
+  function tn(n, key) {
+    var v = UI[key][uiIdx()];
+    if (!Array.isArray(v)) return n + ' ' + v;
+    var d = n % 10, dd = n % 100;
+    return n + ' ' + (n === 1 ? v[0] : d >= 2 && d <= 4 && (dd < 12 || dd > 14) ? v[1] : v[2]);
+  }
   // Heading text: primary language, plus the other one underneath in "both" mode.
   function tb(key) { return S.lang === 'both' ? esc(UI[key][0]) + '<span class="alt">' + esc(UI[key][1]) + '</span>' : esc(t(key)); }
   function bi(o) {
@@ -320,7 +328,7 @@
     var parts = [];
     if (it.cmd) parts.push(t('command') + ': ' + [].concat(it.cmd).join(', '));
     if (it.hc) parts.push(t('builtIn'));
-    if (it.src) parts.push(t('source') + ': ' + t('manual') + ' — ' + it.src);
+    if (it.src) parts.push(t('source') + ': ' + it.src);
     return parts.join('\n');
   }
 
@@ -375,7 +383,7 @@
       html += '<section class="cat" id="cat-' + c.id + '" data-cat="' + c.id + '">' +
         '<div class="cat-head"><div class="cat-icon" aria-hidden="true">' + c.icon + '</div>' +
         '<div><h2>' + bi(c.name) + '</h2><div class="cat-where">' + esc(one(c.where)) + '</div></div>' +
-        '<div class="cat-meta">' + count + ' ' + esc(t('shortcuts')) + '<br>' + esc(t('learned')) + ' ' + p.n + '/' + p.total +
+        '<div class="cat-meta">' + esc(tn(count, 'shortcuts')) + '<br>' + esc(t('learned')) + ' ' + p.n + '/' + p.total +
         '<div class="bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div></div></div>' +
         groupsHtml + tips + '</section>';
     });
@@ -386,8 +394,8 @@
     if (searching) {
       info.hidden = false;
       info.innerHTML = m.combo
-        ? '<b>' + shown + '</b> ' + esc(t('comboResults')) + ' ' + renderKeys(comboToToken(m.combo))
-        : '<b>' + shown + '</b> ' + esc(t('results')) + ' “' + esc(view.q.trim()) + '”';
+        ? esc(tn(shown, 'comboResults')).replace(/^\d+/, '<b>$&</b>') + ' ' + renderKeys(comboToToken(m.combo))
+        : esc(tn(shown, 'results')).replace(/^\d+/, '<b>$&</b>') + ' “' + esc(view.q.trim()) + '”';
     } else info.hidden = true;
 
     // Empty states.
@@ -470,7 +478,7 @@
     el.innerHTML = '<h2>⚙️ ' + tb('setupTitle') + '</h2><p>' + esc(t('setupLead')) + '</p><div class="cards">' +
       D.setup.map(function (s) {
         return '<div class="card"><div class="ic" aria-hidden="true">' + s.icon + '</div><div><h3>' + esc(one(s.title)) + '</h3><p>' + esc(one(s.text)) + '</p>' +
-          (s.src ? '<small class="card-src">📖 ' + esc(t('manual')) + ' — ' + esc(s.src) + '</small>' : '') + '</div></div>';
+          (s.src ? '<small class="card-src">📖 ' + esc(s.src) + '</small>' : '') + '</div></div>';
       }).join('') + '</div>';
   }
 
@@ -483,7 +491,7 @@
     var pct = Math.round(100 * n / ITEMS.length);
     var names = UI.levelNames[uiIdx()];
     $('stats').innerHTML =
-      '<span class="stat"><b>' + ITEMS.length + '</b> ' + esc(t('shortcuts')) + '</span>' +
+      '<span class="stat">' + esc(tn(ITEMS.length, 'shortcuts')).replace(/^\d+/, '<b>$&</b>') + '</span>' +
       (VERIFIED ? '<span class="stat"><span class="ok">✔</span><b>' + VERIFIED + '</b> ' + esc(t('verified')) + '</span>' : '') +
       '<span class="stat">' + esc(t('learned')) + ' <b>' + n + '</b>/' + ITEMS.length + '<span class="bar"><i style="width:' + pct + '%"></i></span></span>' +
       '<span class="stat"><span class="lv l1"></span>' + esc(names[0]) + ' <span class="lv l2"></span>' + esc(names[1]) + ' <span class="lv l3"></span>' + esc(names[2]) + '</span>';
@@ -503,10 +511,11 @@
   function renderFooter() {
     var studio = ITEMS.some(function (r) { return r.it.st; });
     $('footer').innerHTML =
-      '<p>DaVinci Resolve ' + esc(M.label) + ' · ' + ITEMS.length + ' ' + esc(t('shortcuts')) + ' · ' +
+      '<p>DaVinci Resolve ' + esc(M.label) + ' · ' + esc(tn(ITEMS.length, 'shortcuts')) + ' · ' +
       '<a href="' + esc(MANUAL) + '" target="_blank" rel="noopener">' + esc(t('manual')) + ' ↗</a> · ' +
       '<a href="https://github.com/shodahost/key-resolve" target="_blank" rel="noopener">GitHub ↗</a></p>' +
-      '<p>' + bi(M.status) + '</p>' +
+      '<p>' + bi(M.status) + (M.verified ? ' (' + esc(M.verified) + ')' : '') + '</p>' +
+      '<p>' + esc(t('sourceLabel')) + ': <a href="' + esc(M.source.url) + '" target="_blank" rel="noopener">' + esc(M.source.name) + ' ↗</a></p>' +
       '<p>' + bi({ en: UI[M.macVerified ? 'footerMacOk' : 'footerMacNo'][0], pl: UI[M.macVerified ? 'footerMacOk' : 'footerMacNo'][1] }) + '</p>' +
       '<p class="note">💡 ' + bi({ en: UI.footerNote[0], pl: UI.footerNote[1] }) +
       (studio ? '<span class="note-studio"><span class="studio">Studio</span> ' + bi({ en: UI.studioLegend[0], pl: UI.studioLegend[1] }) + '</span>' : '') + '</p>';

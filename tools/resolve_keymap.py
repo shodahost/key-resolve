@@ -120,18 +120,23 @@ def canonical(mods, token):
 def normalize_data_chord(chord):
     """data.js chord ('Shift+Ctrl+Z', 'Ctrl+Num3') -> canonical form."""
     parts = chord.split("+")
-    mods = set()
+    mods, held = set(), []
     for p in parts[:-1]:
-        if p not in MOD_ORDER:
+        if p in MOD_ORDER:
+            mods.add(p)
+        elif valid_token(p):
+            held.append(p)  # a held key, e.g. "K+L" = hold K and press L
+        else:
             raise KeymapError(f"unknown modifier {p!r} in {chord!r}")
-        mods.add(p)
     token = parts[-1]
-    base = re.sub(r"-Drag$", "", re.sub(r"^2x", "", token))
-    ok = (re.fullmatch(r"[A-Z0-9]", base) or re.fullmatch(r"F([1-9]|1[0-9]|2[0-4])", base)
-          or re.fullmatch(r"Num[0-9]", base) or base in DATA_TOKENS or base in MOD_ORDER)
-    if not ok:
+    if not valid_token(re.sub(r"-Drag$", "", re.sub(r"^2x", "", token))):
         raise KeymapError(f"unknown key token {token!r} in {chord!r}")
-    return canonical(mods, token)
+    return canonical(mods, "+".join(held + [token]))
+
+
+def valid_token(t):
+    return bool(re.fullmatch(r"[A-Z0-9]", t) or re.fullmatch(r"F([1-9]|1[0-9]|2[0-4])", t)
+                or re.fullmatch(r"Num[0-9]", t) or t in DATA_TOKENS or t in MOD_ORDER)
 
 
 def parse_export(path_or_text, is_text=False):
@@ -176,3 +181,34 @@ def reverse_index(bindings):
         for ch in chords:
             idx.setdefault(ch, []).append(cmd)
     return idx
+
+
+# ------------------------------------------------------------ article notation
+
+ARTICLE_KEYS = {"up arrow": "Up", "down arrow": "Down", "left arrow": "Left", "right arrow": "Right",
+                "forward delete": "Del"}
+
+
+def normalize_article_keys(text):
+    """Keys as printed in the article ('Ctrl + \\', 'Option + Y', 'Up Arrow').
+
+    Returns a canonical chord, or None when the cell is not a key
+    ('Verify active preset', 'Resolve menu')."""
+    text = text.strip()
+    parts = [p.strip() for p in text.split(" + ")]
+    mods = set()
+    for p in parts[:-1]:
+        low = p.lower()
+        if low not in MOD_ALIASES:
+            return None
+        mods.add(MOD_ALIASES[low])
+    main = parts[-1]
+    low = main.lower()
+    if low in ARTICLE_KEYS:
+        token = ARTICLE_KEYS[low]
+    else:
+        try:
+            token = normalize_export_chord(main)
+        except KeymapError:
+            return None
+    return canonical(mods, token)

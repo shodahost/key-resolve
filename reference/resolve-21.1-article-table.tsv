@@ -1,0 +1,41 @@
+action	category	windows	macos	what_it_does
+Play reverse	Playback	J	J	Shuttle backward; repeated presses increase speed
+Stop	Playback	K	K	Stop shuttle playback
+Play forward	Playback	L	L	Shuttle forward; repeated presses increase speed
+Mark In	Playback	I	I	Set the start of a source, timeline, or render range
+Mark Out	Playback	O	O	Set the end of a source, timeline, or render range
+Selection Mode	Edit	A	A	Return to the normal selection pointer
+Blade Edit Mode	Edit	B	B	Turn the pointer into a click-to-cut blade
+Trim Edit Mode	Trim	T	T	Work with ripple, roll, slip, and slide trims
+Split Clip at playhead	Edit	Ctrl + \	Cmd + \	Add a cut without changing pointer mode
+Toggle snapping	Navigation	N	N	Turn timeline snapping off or on
+Add marker	Navigation	M	M	Add the current marker at the playhead
+Fit timeline in window	Navigation	Shift + Z	Shift + Z	Show the complete timeline; press again to restore zoom
+Previous edit or clip	Navigation	Up Arrow	Up Arrow	Move to the previous edit or clip
+Next edit or clip	Navigation	Down Arrow	Down Arrow	Move to the next edit or clip
+Nudge left 1 frame	Trim	,	,	Move the selected clip or edit one frame left
+Nudge right 1 frame	Trim	.	.	Move the selected clip or edit one frame right
+Fast nudge left 5 frames	Trim	Shift + ,	Shift + ,	Move left by the default fast-nudge amount
+Fast nudge right 5 frames	Trim	Shift + .	Shift + .	Move right by the default fast-nudge amount
+Extend edit to playhead	Trim	E	E	Move the selected edit point to the playhead
+Trim start to playhead	Trim	Shift + [	Shift + [	Trim the clip start at the playhead
+Trim end to playhead	Trim	Shift + ]	Shift + ]	Trim the clip end at the playhead
+Enable or disable clip	Edit	D	D	Toggle the selected clip without deleting it
+Toggle linked selection	Edit	Ctrl + Shift + L	Cmd + Shift + L	Change whether linked picture and sound select together
+Select clips forward on current track	Navigation	Y	Y	Select later clips on the targeted track
+Select clips forward on all tracks	Navigation	Alt + Y	Option + Y	Select later clips across tracks
+Ripple cut selection	Edit	Ctrl + Shift + X	Cmd + Shift + X	Cut the selection to the clipboard and close the gap
+Ripple Delete	Edit	Verify active preset	Verify active preset	Delete and close time; physical Delete labels and emulation maps vary
+Insert edit	Edit	F9	F9	Insert source material and move later timeline content
+Overwrite edit	Edit	F10	F10	Replace timeline material without moving later content
+Replace edit	Edit	F11	F11	Replace by matching the source and timeline positions
+Place on top	Edit	F12	F12	Place video above existing clips, or audio below, on the first empty track
+Fit to Fill	Edit	Shift + F11	Shift + F11	Retime the source range to fill the destination duration
+Append to end	Edit	Shift + F12	Shift + F12	Add source material at the end of the timeline
+Save project	Project	Ctrl + S	Cmd + S	Save the current project
+Undo	Project	Ctrl + Z	Cmd + Z	Reverse the last action
+Redo	Project	Ctrl + Shift + Z	Cmd + Shift + Z	Restore the last undone action under the Resolve preset
+Cut	Project	Ctrl + X	Cmd + X	Cut the current selection
+Copy	Project	Ctrl + C	Cmd + C	Copy the current selection
+Paste	Project	Ctrl + V	Cmd + V	Paste at the active destination
+Keyboard Customization	Project	Resolve menu	Resolve menu	Open the documented menu route and confirm the active map
