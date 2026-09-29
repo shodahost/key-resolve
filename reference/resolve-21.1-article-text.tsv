@@ -1,0 +1,12 @@
+action	windows	macos	quote
+Step one frame back	Left Arrow	=	Add the left and right arrow keys for precise frame stepping.
+Step one frame forward	Right Arrow	=	Add the left and right arrow keys for precise frame stepping.
+Dynamic Trim Mode	W	=	For J/K/L trimming on the Edit page, select the edit point and press W, or choose Trim > Dynamic Trim Mode.
+Ripple Delete (Forward Delete)	Del	=	Distinguish the command from the keycap: the manual calls the ripple key Forward Delete, while compact Mac keyboards label the backspace key Delete.
+Media page	Shift + 2	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Cut page	Shift + 3	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Edit page	Shift + 4	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Fusion page	Shift + 5	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Color page	Shift + 6	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Fairlight page	Shift + 7	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
+Deliver page	Shift + 8	=	Shift+2 through Shift+8: switch between Media, Cut, Edit, Fusion, Color, Fairlight, and Deliver pages under the standard Resolve map.
